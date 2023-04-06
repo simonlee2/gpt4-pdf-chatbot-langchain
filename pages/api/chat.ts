@@ -46,7 +46,12 @@ export default async function handler(
       chat_history: history || [],
     });
 
-    console.log('response', response);
+    const logJson = JSON.stringify({
+      question: sanitizedQuestion,
+      response: response.text,
+    });
+    console.log(`[PROMPT] ${sanitizedQuestion}; ${logJson}`);
+    
     res.status(200).json(response);
   } catch (error: any) {
     console.log('error', error);
