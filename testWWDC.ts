@@ -1,8 +1,8 @@
 import { WWDCTranscriptLoader } from "./utils/wwdcTranscriptLoader";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { OpenAI } from "langchain/llms";
-import { LLMChain, loadSummarizationChain } from "langchain/chains";
-import { PromptTemplate } from "langchain/prompts";
+import { OpenAI } from "langchain/llms/openai";
+import { loadSummarizationChain } from "langchain/chains";
+import { PromptTemplate } from "langchain";
 
 // main
 const loader = new WWDCTranscriptLoader();

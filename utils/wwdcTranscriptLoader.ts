@@ -1,5 +1,5 @@
 import { Document } from 'langchain/document';
-import { BaseDocumentLoader } from 'langchain/document_loaders';
+import { BaseDocumentLoader } from 'langchain/document_loaders/base';
 
 interface Content {
     id: string;
