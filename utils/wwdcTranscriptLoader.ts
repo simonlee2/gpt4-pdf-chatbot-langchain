@@ -23,33 +23,69 @@ interface Transcript {
     transcript: [time: number, text: string][];
 }
 
-interface TranscribedContent extends Content {
-    transcript: String;
+interface Manifest {
+    updated: string;
+    digest: {
+        etag: string;
+        url: string;
+    },
+    individual: {
+        [sessionId: string]: {
+            etag: string;
+            url: string;
+        };
+    };
 }
 
 export interface WWDCTranscriptLoaderOptions {
-    transcriptsUrl?: string;
-    contentsUrl?: string;
+    sessionId?: string;
 }
 
 export class WWDCTranscriptLoader
     extends BaseDocumentLoader
 {
-    private readonly transcriptsUrl: string;
-    private readonly contentsUrl: string;
+    private readonly sessionId?: string;
+    private readonly transcriptsManifestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/transcript-manifest-eng.json'
+    private readonly transcriptsDigestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/transcript-digest-eng.json'
+    private readonly contentsUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/contents.json'
 
     constructor({
-        transcriptsUrl = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/transcript-digest-eng.json',
-        contentsUrl = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/contents.json',
+        sessionId,
     }: WWDCTranscriptLoaderOptions = {}) {
         super();
-        this.transcriptsUrl = transcriptsUrl;
-        this.contentsUrl = contentsUrl;
+
+        this.sessionId = sessionId;
     }
 
     public async load(): Promise<Document[]> {
-        const documents = await this.processSessions();
-        return documents;
+        if (this.sessionId) {
+            return await this.processSession(this.sessionId);
+        } else {
+            return await this.processSessions();
+        }
+    }
+
+    private async processSession(sessionId: string): Promise<Document[]> {
+        const contents = await this.fetch_all_contents();
+        const transcript = await this.fetch_transcript(sessionId);
+        const id = transcript.id;
+        const content =contents.get(id);
+        const processed_transcript = this.process_transcript(transcript);
+
+        if (content) {
+            const document = new Document({
+                pageContent: processed_transcript,
+                metadata: {
+                    id,
+                    title: content.title,
+                    description: content.description,
+                    source: content.webPermalink,
+                },
+            }); 
+            return [document];
+        } else {
+            return [];
+        }
     }
 
     private async processSessions(): Promise<Document[]> {
@@ -57,7 +93,7 @@ export class WWDCTranscriptLoader
         const contents = await this.fetch_all_contents();
         const transcripts = await this.fetch_all_transcripts();
 
-        for (const transcript of transcripts.slice(0, 1)) {
+        for (const transcript of transcripts) {
             const id = transcript.id;
             const content = contents.get(id);
             const processed_transcript = this.process_transcript(transcript);
@@ -80,6 +116,7 @@ export class WWDCTranscriptLoader
 
     private process_transcript(transcript: Transcript): string {
         let result = "";
+        let include_timestamp = true;
         for (const line of transcript.transcript) {
             let [time, text] = line;
 
@@ -89,14 +126,23 @@ export class WWDCTranscriptLoader
             // remove ♪ characters
             text = text.replace(/♪/g, '');
 
-            // replace newline with space
-            text = text.replace(/\n/g, ' ');
-
             // append text to result
-            result += `${text}`;
+            if (include_timestamp) {
+                result += `[${time}]: ${text}`;
+            } else {
+                result += text;
+            }
+
+            // if text ends with \n\n
+            if (text.endsWith('\n\n')) {
+                include_timestamp = true;
+            } else {
+                include_timestamp = false;
+            }
         }
 
         // post-process result
+        result = result.replace(/\n\n/g, ' ');
         // remove multiple spaces
         result = result.replace(/ +/g, ' ');
         // remove ' \.'
@@ -131,7 +177,7 @@ export class WWDCTranscriptLoader
     private async fetch_all_transcripts(): Promise<Transcript[]> {
         const transcripts: Transcript[] = [];
 
-        const response = await fetch(this.transcriptsUrl);
+        const response = await fetch(this.transcriptsDigestUrl);
         const json = await response.json();
 
         for (const key in json) {
@@ -141,5 +187,15 @@ export class WWDCTranscriptLoader
         }
  
         return transcripts
+    }
+
+    private async fetch_transcript(sessionId: string): Promise<Transcript> {
+        const response = await fetch(this.transcriptsManifestUrl);
+        const manifest = await response.json() as Manifest;
+        const transcriptManifest = manifest.individual[sessionId];
+        const transcriptManifestResponse = await fetch(transcriptManifest.url)
+        const transcript = (await transcriptManifestResponse.json())[sessionId] as Transcript;
+        transcript.id = sessionId;
+        return transcript;
     }
 }
