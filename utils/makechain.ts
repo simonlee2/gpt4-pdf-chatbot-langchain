@@ -20,12 +20,12 @@ Only include links that are referenced in the transcript; do not make up any lin
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = (vectorstore: PineconeStore) => {
+export const makeQAChain = (vectorstore: PineconeStore) => {
   const model = new OpenAI({
     temperature: 0, // increase temepreature to get more creative answers
     modelName: 'gpt-4', //change this to gpt-4 if you have access
   },
-  { basePath: 'https://oai.hconeai.com/v1'}
+    { basePath: 'https://oai.hconeai.com/v1' }
   );
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
