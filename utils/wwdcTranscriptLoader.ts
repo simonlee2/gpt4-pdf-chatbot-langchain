@@ -45,9 +45,9 @@ export class WWDCTranscriptLoader
     extends BaseDocumentLoader
 {
     private readonly sessionId?: string;
-    private readonly transcriptsManifestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/transcript-manifest-eng.json'
-    private readonly transcriptsDigestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/transcript-digest-eng.json'
-    private readonly contentsUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/rd7a2338/9A892547-1713-4B1B-9D45-2C7A885BEDEF/contents.json'
+    private readonly transcriptsManifestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/transcript-manifest-eng.json'
+    private readonly transcriptsDigestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/transcript-digest-eng.json'
+    private readonly contentsUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/contents.json'
 
     constructor({
         sessionId,
@@ -194,7 +194,8 @@ export class WWDCTranscriptLoader
         const manifest = await response.json() as Manifest;
         const transcriptManifest = manifest.individual[sessionId];
         const transcriptManifestResponse = await fetch(transcriptManifest.url)
-        const transcript = (await transcriptManifestResponse.json())[sessionId] as Transcript;
+        const transcriptManifestJson = await transcriptManifestResponse.json();
+        const transcript = transcriptManifestJson[sessionId] as Transcript;
         transcript.id = sessionId;
         return transcript;
     }
