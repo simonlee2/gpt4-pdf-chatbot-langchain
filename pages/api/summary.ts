@@ -32,7 +32,7 @@ export default async function handler(
   console.log('sessionId', sessionId);
   try {
     const summary = await handleSummaryRequest(sessionId);
-
+    console.log('summary: ', summary);
     res.status(200).json({ summary });
   } catch (error: any) {
     console.log('error', error);
