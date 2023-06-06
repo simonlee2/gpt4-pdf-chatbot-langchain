@@ -62,8 +62,9 @@ const SECTION_TITLES_PROMPT_TEMPLATE = new PromptTemplate({
 });
 
 const SUMMARY_PROMP = `Your mission is to write an outline of a video using a list of key points from a video.
-The outline should be in Markdown format and organized into header, subheaders, and lists of key points.
-Each of the header, subheader, and keypoints should include a timestamp for the first subtitle that it's based on.
+Extract topics as h1 and h2 headers. Extract keypoints as bullet points under the appropriate header.
+Each of the header, subheader, and keypoints should include a timestamp for the first subtitle that it's based on
+For example: "# [31] Topic 1" or "- [31] Key point 1".
 
 The key points are given between the triple quotes below:
 """
