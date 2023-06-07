@@ -45,9 +45,9 @@ export class WWDCTranscriptLoader
     extends BaseDocumentLoader
 {
     private readonly sessionId?: string;
-    private readonly transcriptsManifestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/transcript-manifest-eng.json'
-    private readonly transcriptsDigestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/transcript-digest-eng.json'
-    private readonly contentsUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/tbca3a57/19D02D1D-944F-4152-9AC5-FB5EF1440FDC/contents.json'
+    private readonly transcriptsManifestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/d73c6be4/58F4932B-A6C0-4997-A114-551E0C803B53/transcript-manifest-eng.json'
+    private readonly transcriptsDigestUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/d73c6be4/58F4932B-A6C0-4997-A114-551E0C803B53/transcript-digest-eng.json'
+    private readonly contentsUrl: string = 'https://devimages-cdn.apple.com/wwdc-services/d73c6be4/58F4932B-A6C0-4997-A114-551E0C803B53/contents.json'
 
     constructor({
         sessionId,
